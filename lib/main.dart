@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone_coding/home_layout.dart';
 import 'package:instagram_clone_coding/scaffold/appbar.dart';
+import 'package:instagram_clone_coding/store.dart';
 import 'package:instagram_clone_coding/style.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:instagram_clone_coding/upload.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(
-    MaterialApp(
-      theme: ScaffoldStyle,
-      home: const MyApp(),
+    ChangeNotifierProvider(
+      create: (c) => Store(),
+      child: MaterialApp(
+        theme: ScaffoldStyle,
+        home: const MyApp(),
+      ),
     ),
   );
 }
@@ -24,11 +32,14 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   var _tab = 0;
   final body = [HomeLayout(), Text('샵페이지')];
-  // This widget is the root of your application.
-
   var data = [];
-
   var scroll = ScrollController();
+  saveData() async {
+    var storage = await SharedPreferences.getInstance();
+    storage.setString('name', 'john');
+    var result = storage.getString('name');
+    print(result);
+  }
 
   getData() async {
     try {
@@ -70,10 +81,54 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  var userImage;
+  var userContent;
+  setUserContent(a) {
+    setState(() {
+      userContent = a;
+    });
+  }
+
+  addImage() {
+    var mdata = {
+      'id': data.length,
+      'image': userImage,
+      'content': userContent,
+      'user': 'ulysss',
+      'likes': 0,
+      'liked': false,
+      'date': '2021-07-01',
+    };
+    setState(() {
+      data.insert(0, mdata);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: insta_appbar,
+      appBar: InstaAppBar(
+        onPressAction: () async {
+          var picker = ImagePicker();
+          var pickedFile = await picker.pickImage(source: ImageSource.gallery);
+          if (pickedFile != null) {
+            setState(() {
+              userImage = (pickedFile.path);
+            });
+            // ignore: use_build_context_synchronously
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Upload(
+                    userImage: userImage,
+                    userContent: userContent,
+                    setUserContent: setUserContent,
+                    addImage: addImage,
+                  ),
+                ));
+          }
+        },
+      ),
       bottomNavigationBar: BottomNavigationBar(
         showSelectedLabels: false,
         showUnselectedLabels: false,
