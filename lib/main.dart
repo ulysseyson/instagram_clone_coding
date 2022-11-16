@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone_coding/home_layout.dart';
+import 'package:instagram_clone_coding/notification.dart';
 import 'package:instagram_clone_coding/scaffold/appbar.dart';
 import 'package:instagram_clone_coding/store.dart';
 import 'package:instagram_clone_coding/style.dart';
@@ -110,52 +111,59 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: InstaAppBar(
-        onPressAction: () async {
-          var picker = ImagePicker();
-          var pickedFile = await picker.pickImage(source: ImageSource.gallery);
-          if (pickedFile != null) {
+        appBar: InstaAppBar(
+          onPressAction: () async {
+            var picker = ImagePicker();
+            var pickedFile =
+                await picker.pickImage(source: ImageSource.gallery);
+            if (pickedFile != null) {
+              setState(() {
+                userImage = (pickedFile.path);
+              });
+              // ignore: use_build_context_synchronously
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Upload(
+                      userImage: userImage,
+                      userContent: userContent,
+                      setUserContent: setUserContent,
+                      addImage: addImage,
+                    ),
+                  ));
+            }
+          },
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          currentIndex: _tab,
+          onTap: (i) {
+            print(i);
             setState(() {
-              userImage = (pickedFile.path);
+              _tab = i;
             });
-            // ignore: use_build_context_synchronously
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Upload(
-                    userImage: userImage,
-                    userContent: userContent,
-                    setUserContent: setUserContent,
-                    addImage: addImage,
-                  ),
-                ));
-          }
-        },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        currentIndex: _tab,
-        onTap: (i) {
-          print(i);
-          setState(() {
-            _tab = i;
-          });
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: _tab == 0 ? Icon(Icons.home) : Icon(Icons.home_outlined),
-            label: "home",
-          ),
-          BottomNavigationBarItem(
-            icon: _tab == 1
-                ? Icon(Icons.shopping_bag)
-                : Icon(Icons.shopping_bag_outlined),
-            label: "shop",
-          ),
-        ],
-      ),
-      body: HomeLayout(data: data, scroll: scroll),
-    );
+          },
+          items: [
+            BottomNavigationBarItem(
+              icon: _tab == 0 ? Icon(Icons.home) : Icon(Icons.home_outlined),
+              label: "home",
+            ),
+            BottomNavigationBarItem(
+              icon: _tab == 1
+                  ? Icon(Icons.shopping_bag)
+                  : Icon(Icons.shopping_bag_outlined),
+              label: "shop",
+            ),
+          ],
+        ),
+        body: HomeLayout(data: data, scroll: scroll),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            print("Dfdf");
+            showNotification();
+          },
+          child: Icon(Icons.add),
+        ));
   }
 }
