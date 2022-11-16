@@ -12,8 +12,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (c) => Store(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (c) => Store()),
+        ChangeNotifierProvider(create: (c) => Store1()),
+      ],
       child: MaterialApp(
         theme: ScaffoldStyle,
         home: const MyApp(),
